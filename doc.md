@@ -769,7 +769,7 @@ Embora uma solução Peer-to-Peer apresente vantagens em termos de descentraliza
 
 
 Compilar
-g++ -std=c++20 src/server/main.cpp -o test.exe
+g++ -std=c++20 main.cpp -o test.exe
 .\test.exe
 
 
