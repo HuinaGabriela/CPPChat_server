@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <thread>
+#include <chrono>
 
 bool TCPServer::start(int port)
 {
@@ -41,25 +43,47 @@ bool TCPServer::start(int port)
               << '\n';
 
     std::cout << "Waiting for a client...\n"; //deletar depois
-    sockaddr_in client_addr{};
-    socklen_t client_len = sizeof(client_addr);
-
-    int client_socket =
-        accept(server_fd,
-               reinterpret_cast<sockaddr*>(&client_addr),
-               &client_len);
-
-    if (client_socket >= 0)
+    // loop infinito de accept assim servidor fica sempre rodando, esperando por conexões
+    while (true)
     {
-        std::cout << "Client connected!\n";
-        close(client_socket);
-    }
-    else
-    {
-        std::cerr << "accept() failed\n";
+        sockaddr_in client_addr{};
+        socklen_t client_len = sizeof(client_addr);
+
+        int client_socket =
+            accept(server_fd,
+                reinterpret_cast<sockaddr*>(&client_addr),
+                &client_len);
+
+        if (client_socket >= 0)
+        {
+            std::cout << "Creating thread..." << std::endl; // remover depois
+            std::thread client_thread(&TCPServer::handleClient, this, client_socket);
+            client_thread.detach();
+        }
+        else
+        {
+            std::cerr << "accept() failed\n";
+        }
     }
 
     close(server_fd);
 
     return true;
+}
+
+
+void TCPServer::handleClient(int clientSocket)
+{
+    std::cout << "Thread START: "
+              << std::this_thread::get_id()
+              << std::endl;
+
+    std::this_thread::sleep_for(
+        std::chrono::seconds(30));
+
+    std::cout << "Thread END: "
+              << std::this_thread::get_id()
+              << std::endl;
+
+    close(clientSocket);
 }
