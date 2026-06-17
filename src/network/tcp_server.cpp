@@ -74,16 +74,26 @@ bool TCPServer::start(int port)
 
 void TCPServer::handleClient(int clientSocket)
 {
-    std::cout << "Thread START: "
+    std::cout << "Thread ID: "
               << std::this_thread::get_id()
               << std::endl;
 
-    std::this_thread::sleep_for(
-        std::chrono::seconds(30));
+    char buffer[1024];
 
-    std::cout << "Thread END: "
-              << std::this_thread::get_id()
-              << std::endl;
+    ssize_t bytesReceived =
+        recv(clientSocket, // Aguarda receber dados do cliente
+             buffer,
+             sizeof(buffer) - 1,
+             0);
+
+    if (bytesReceived > 0)
+    {
+        buffer[bytesReceived] = '\0';
+
+        std::cout << "Received: "
+                  << buffer
+                  << std::endl;
+    }
 
     close(clientSocket);
 }
