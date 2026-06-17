@@ -80,14 +80,22 @@ void TCPServer::handleClient(int clientSocket)
 
     char buffer[1024];
 
-    ssize_t bytesReceived =
-        recv(clientSocket, // Aguarda receber dados do cliente
-             buffer,
-             sizeof(buffer) - 1,
-             0);
-
-    if (bytesReceived > 0)
+    while (true)
     {
+        ssize_t bytesReceived =
+            recv(clientSocket,
+                 buffer,
+                 sizeof(buffer) - 1,
+                 0);
+
+        if (bytesReceived <= 0)
+        {
+            std::cout << "Client disconnected"
+                      << std::endl;
+
+            break;
+        }
+
         buffer[bytesReceived] = '\0';
 
         std::cout << "Received: "
